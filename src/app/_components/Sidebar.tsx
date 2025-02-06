@@ -1,20 +1,27 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 import SidebarLink from "./SidebarLink";
+import { useState } from "react";
 
-interface SidebarProps {
-  isOpen: boolean;
-  onClick: () => void;
-}
+export default function Sidebar() {
+  const [sidebar, setSidebar] = useState<boolean>(false);
 
-export default function Sidebar({ isOpen, onClick }: SidebarProps) {
   return (
     <div
-      className={`h-screen absolute top-0 ${
-        isOpen ? "-left-0" : "-left-full"
-      } aspect-[9/16] bg-[#222222] bg-opacity-67 backdrop-blur-[20px]`}
+      className={`h-screen z-50 transition-all ease-in-out duration-500 absolute top-0 left-0 aspect-[9/16] ${
+        sidebar ? "bg-[#222222] backdrop-blur-[20px]" : "bg-transparent"
+      } bg-opacity-67  `}
     >
-      <div className="flex flex-col justify-start items-start w-3/4 h-screen bg-gradient-to-b from-mainBlue to-darkBlue rounded-tr-xl rounded-br-xl py-8">
+      <div
+        className="w-full h-full absolute top-0 left-0 bg-transparent"
+        onClick={() => setSidebar(true)}
+      ></div>
+      <div
+        className={`${
+          sidebar ? "left-0" : "-left-full"
+        } flex flex-col justify-start relative transition-all ease-in-out duration-500 items-start w-3/4 h-screen bg-gradient-to-b from-mainBlue to-darkBlue rounded-tr-xl rounded-br-xl py-8`}
+      >
         {/* HEADER */}
         <div className="w-full bg-white rounded-md px-6 py-4 flex justify-between items-center">
           <div className="w-32 justify-center items-center overflow-hidden">
@@ -28,7 +35,7 @@ export default function Sidebar({ isOpen, onClick }: SidebarProps) {
           </div>
           {/* CLOSE */}
           <button
-            onClick={onClick}
+            onClick={() => setSidebar(false)}
             className="h-8 aspect-square overflow-hidden flex justify-center items-center"
           >
             <div className="h-8 flex justify-center items-center overflow-hidden">

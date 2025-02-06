@@ -1,15 +1,29 @@
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface LoadingProps {
   loading: boolean;
 }
 
 export default function Loading({ loading }: LoadingProps) {
+  const [progress, setProgress] = useState(10);
+
+  useEffect(() => {
+    if (loading) {
+      if (progress < 95) {
+        setTimeout(() => {
+          setProgress(progress + 1);
+        }, 10);
+      }
+    } else {
+      setProgress(100);
+    }
+  }, [progress, loading]);
+
   return (
     <div
-      className={`h-screen overflow-hidden fixed z-50 justify-center items-center bg-white aspect-[9/16] ${
-        loading ? "flex" : "hidden"
+      className={` flex h-screen delay-1000 transition-all ease-in-out duration-500 overflow-hidden fixed z-50 justify-center items-center bg-white aspect-[9/16] ${
+        progress == 100 ? "opacity-0 -z-0" : "opacity-100"
       }`}
     >
       {/* MAIN */}
@@ -27,7 +41,7 @@ export default function Loading({ loading }: LoadingProps) {
         <div className="w-[90%] justify-start items-start h-3 rounded-xl bg-[#E6E6E6] overflow-hidden mb-24">
           <div
             className="h-full bg-gradient-to-r from-[#1C2A58] to-[#149FA9] rounded-xl transition-all ease-in-out duration-300"
-            style={{ width: "80%" }}
+            style={{ width: progress + "%" }}
           ></div>
         </div>
 

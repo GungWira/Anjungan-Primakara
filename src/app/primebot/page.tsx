@@ -4,6 +4,7 @@ import VideoPlayer from "../_components/VideoPlayer";
 import Image from "next/image";
 import Link from "next/link";
 import SubtitlePlayer from "../_components/Subtitle";
+import Loading from "../_components/Loading";
 
 declare global {
   interface Window {
@@ -14,8 +15,8 @@ declare global {
 
 export default function Home() {
   const [state, setState] = useState<
-    "transform" | "idle" | "hearing" | "searching" | "speaking"
-  >("transform");
+    "transform" | "idle" | "hearing" | "searching" | "speaking" | "loading"
+  >("loading");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -27,6 +28,41 @@ export default function Home() {
   const hearingVideoRef = useRef<HTMLVideoElement>(null);
   const searchingVideoRef = useRef<HTMLVideoElement>(null);
   const speakingVideoRef = useRef<HTMLVideoElement>(null);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    let loadedCount = 0;
+
+    const handleVideoLoad = () => {
+      loadedCount++;
+      if (loadedCount <= 5) {
+        if (loadedCount === 5) {
+          setIsLoading(false);
+          setTimeout(() => {
+            setState("transform");
+          }, 3000);
+        }
+      }
+    };
+
+    if (transformVideoRef.current != null) {
+      transformVideoRef.current.addEventListener("canplay", handleVideoLoad);
+    }
+    if (idleVideoRef.current != null) {
+      idleVideoRef.current.addEventListener("canplay", handleVideoLoad);
+    }
+    if (hearingVideoRef.current != null) {
+      hearingVideoRef.current.addEventListener("canplay", handleVideoLoad);
+    }
+    if (searchingVideoRef.current != null) {
+      searchingVideoRef.current.addEventListener("canplay", handleVideoLoad);
+    }
+    if (speakingVideoRef.current != null) {
+      speakingVideoRef.current.addEventListener("canplay", handleVideoLoad);
+    }
+  }, []);
 
   useEffect(() => {
     if (
@@ -120,6 +156,7 @@ export default function Home() {
 
   return (
     <div className="w-full h-screen bg-white overflow-hidden flex flex-col justify-center items-center relative min-h-screen">
+      <Loading loading={isLoading} />
       <div className="h-screen aspect-[9/16] flex justify-center items-center relative bg-black">
         {/* HEAD */}
         <div className="w-full absolute top-0 left-0 flex justify-between items-center px-8 py-8">
@@ -254,10 +291,6 @@ export default function Home() {
             </Link>
           </div>
         </div>
-
-        {/* {audioUrl && (
-          <audio ref={audioRef} src={audioUrl} onEnded={handleAudioEnd} />
-        )} */}
       </div>
     </div>
   );
