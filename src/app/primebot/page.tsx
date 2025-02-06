@@ -19,7 +19,6 @@ export default function Home() {
   >("loading");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const isHolding = useRef<boolean>(false);
   const recognitionRef = useRef<any>(null);
 
@@ -81,19 +80,21 @@ export default function Home() {
         sendToBackend(transcript);
       };
 
+      recognition.onend = () => {
+        if (isHolding.current) {
+          recognition.stop();
+        }
+
+        if (state === "searching") {
+          setState("idle");
+        }
+      };
+
       recognitionRef.current = recognition;
     } else {
       console.warn("Speech Recognition API is not supported in this browser.");
     }
   }, []);
-
-  useEffect(() => {
-    if (state === "speaking" && audioUrl && audioRef.current) {
-      audioRef.current
-        .play()
-        .catch((err) => console.error("Error playing audio:", err));
-    }
-  }, [state, audioUrl]);
 
   const handleVideoEnd = () => {
     if (state === "transform") {
@@ -112,7 +113,7 @@ export default function Home() {
 
   const handleHoldEnd = () => {
     isHolding.current = false;
-    setState("searching");
+    setState("idle");
 
     if (recognitionRef.current) {
       recognitionRef.current.stop();
@@ -120,6 +121,7 @@ export default function Home() {
   };
 
   const sendToBackend = async (text: string) => {
+    setState("searching");
     try {
       const response = await fetch(
         "https://chatbackend.primakara.ac.id/chat/",
@@ -139,7 +141,7 @@ export default function Home() {
       }
 
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
       setAudioUrl(data.voice);
       setTranscript(data.text);
       setState("speaking");
