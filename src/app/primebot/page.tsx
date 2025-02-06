@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import VideoPlayer from "../_components/VideoPlayer";
 import Image from "next/image";
 import Link from "next/link";
+import SubtitlePlayer from "../_components/Subtitle";
 
 declare global {
   interface Window {
@@ -16,6 +17,7 @@ export default function Home() {
     "transform" | "idle" | "hearing" | "searching" | "speaking"
   >("transform");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [transcript, setTranscript] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const isHolding = useRef<boolean>(false);
   const recognitionRef = useRef<any>(null);
@@ -103,6 +105,7 @@ export default function Home() {
       const data = await response.json();
       console.log(data);
       setAudioUrl(data.voice);
+      setTranscript(data.text);
       setState("speaking");
     } catch (error) {
       console.error("Error fetching response:", error);
@@ -147,36 +150,43 @@ export default function Home() {
           </div>
         </div>
         {/* VIDEO */}
-        <div className="flex justify-center flex-col items-center w-[100%] relative overflow-hidden">
-          <VideoPlayer
-            src="Primebot/Berubah.mov"
-            isActive={state === "transform"}
-            onEnded={handleVideoEnd}
-            videoRef={transformVideoRef}
-          />
-          <VideoPlayer
-            src="Primebot/Diam.mov"
-            isActive={state === "idle"}
-            videoRef={idleVideoRef}
-            position={"relative"}
-            loop={true}
-          />
-          <VideoPlayer
-            src="Primebot/Mendengarkan.mov"
-            isActive={state === "hearing"}
-            videoRef={hearingVideoRef}
-          />
-          <VideoPlayer
-            src="Primebot/Mencari.mov"
-            isActive={state === "searching"}
-            loop
-            videoRef={searchingVideoRef}
-          />
-          <VideoPlayer
-            src="Primebot/Berbicara.mov"
-            isActive={state === "speaking"}
-            loop
-            videoRef={speakingVideoRef}
+        <div className="w-full flex flex-col justify-center items-center gap-8">
+          <div className="flex justify-center flex-col items-center w-[100%] relative overflow-hidden">
+            <VideoPlayer
+              src="Primebot/Berubah.mov"
+              isActive={state === "transform"}
+              onEnded={handleVideoEnd}
+              videoRef={transformVideoRef}
+            />
+            <VideoPlayer
+              src="Primebot/Diam.mov"
+              isActive={state === "idle"}
+              videoRef={idleVideoRef}
+              position={"relative"}
+              loop={true}
+            />
+            <VideoPlayer
+              src="Primebot/Mendengarkan.mov"
+              isActive={state === "hearing"}
+              videoRef={hearingVideoRef}
+            />
+            <VideoPlayer
+              src="Primebot/Mencari.mov"
+              isActive={state === "searching"}
+              loop
+              videoRef={searchingVideoRef}
+            />
+            <VideoPlayer
+              src="Primebot/Berbicara.mov"
+              isActive={state === "speaking"}
+              loop
+              videoRef={speakingVideoRef}
+            />
+          </div>
+          <SubtitlePlayer
+            audioUrl={audioUrl}
+            transcript={transcript}
+            onEnded={handleAudioEnd}
           />
         </div>
 
@@ -245,9 +255,9 @@ export default function Home() {
           </div>
         </div>
 
-        {audioUrl && (
+        {/* {audioUrl && (
           <audio ref={audioRef} src={audioUrl} onEnded={handleAudioEnd} />
-        )}
+        )} */}
       </div>
     </div>
   );
