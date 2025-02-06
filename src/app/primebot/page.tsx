@@ -1,0 +1,254 @@
+"use client";
+import { useState, useEffect, useRef } from "react";
+import VideoPlayer from "../_components/VideoPlayer";
+import Image from "next/image";
+import Link from "next/link";
+
+declare global {
+  interface Window {
+    webkitSpeechRecognition: any;
+    SpeechRecognition: any;
+  }
+}
+
+export default function Home() {
+  const [state, setState] = useState<
+    "transform" | "idle" | "hearing" | "searching" | "speaking"
+  >("transform");
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const isHolding = useRef<boolean>(false);
+  const recognitionRef = useRef<any>(null);
+
+  const transformVideoRef = useRef<HTMLVideoElement>(null);
+  const idleVideoRef = useRef<HTMLVideoElement>(null);
+  const hearingVideoRef = useRef<HTMLVideoElement>(null);
+  const searchingVideoRef = useRef<HTMLVideoElement>(null);
+  const speakingVideoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)
+    ) {
+      const SpeechRecognitionAPI =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognitionAPI();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "id-ID";
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        sendToBackend(transcript);
+      };
+
+      recognitionRef.current = recognition;
+    } else {
+      console.warn("Speech Recognition API is not supported in this browser.");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (state === "speaking" && audioUrl && audioRef.current) {
+      audioRef.current
+        .play()
+        .catch((err) => console.error("Error playing audio:", err));
+    }
+  }, [state, audioUrl]);
+
+  const handleVideoEnd = () => {
+    if (state === "transform") {
+      setState("idle");
+    }
+  };
+
+  const handleHoldStart = () => {
+    isHolding.current = true;
+    setState("hearing");
+
+    if (recognitionRef.current) {
+      recognitionRef.current.start();
+    }
+  };
+
+  const handleHoldEnd = () => {
+    isHolding.current = false;
+    setState("searching");
+
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+  };
+
+  const sendToBackend = async (text: string) => {
+    try {
+      const response = await fetch(
+        "https://chatbackend.primakara.ac.id/chat/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Bearer Lb3NbSWIPQb3YaDVLwUaxljWwGp6CxqKorqEEqFLajw=",
+          },
+          body: JSON.stringify({ query: text }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch response from backend");
+      }
+
+      const data = await response.json();
+      console.log(data);
+      setAudioUrl(data.voice);
+      setState("speaking");
+    } catch (error) {
+      console.error("Error fetching response:", error);
+      setState("idle");
+    }
+  };
+
+  const handleAudioEnd = () => {
+    setAudioUrl(null);
+    setState("idle");
+  };
+
+  return (
+    <div className="w-full h-screen bg-white overflow-hidden flex flex-col justify-center items-center relative min-h-screen">
+      <div className="h-screen aspect-[9/16] flex justify-center items-center relative bg-black">
+        {/* HEAD */}
+        <div className="w-full absolute top-0 left-0 flex justify-between items-center px-8 py-8">
+          <Link href={"/"}>
+            <div className="h-10 justify-center items-center overflow-hidden">
+              <Image
+                src={"/Primebot/Logo.svg"}
+                alt="Logo Primakara"
+                width={1}
+                height={1}
+                className="h-full w-auto"
+              />
+            </div>
+          </Link>
+
+          {/* LANGUAGE */}
+          <div className="w-fit px-4 py-1 rounded-full bg-white flex flex-row justify-center items-center gap-2">
+            <div className="w-6 justify-center items-center overflow-hidden rounded-full">
+              <Image
+                src={"/Primebot/ID.svg"}
+                alt="Logo ID"
+                width={1}
+                height={1}
+                className="w-full"
+              />
+            </div>
+            <p className="text-darkBlue text-sm">ID</p>
+          </div>
+        </div>
+        {/* VIDEO */}
+        <div className="flex justify-center flex-col items-center w-[100%] relative overflow-hidden">
+          <VideoPlayer
+            src="Primebot/Berubah.mov"
+            isActive={state === "transform"}
+            onEnded={handleVideoEnd}
+            videoRef={transformVideoRef}
+          />
+          <VideoPlayer
+            src="Primebot/Diam.mov"
+            isActive={state === "idle"}
+            videoRef={idleVideoRef}
+            position={"relative"}
+            loop={true}
+          />
+          <VideoPlayer
+            src="Primebot/Mendengarkan.mov"
+            isActive={state === "hearing"}
+            videoRef={hearingVideoRef}
+          />
+          <VideoPlayer
+            src="Primebot/Mencari.mov"
+            isActive={state === "searching"}
+            loop
+            videoRef={searchingVideoRef}
+          />
+          <VideoPlayer
+            src="Primebot/Berbicara.mov"
+            isActive={state === "speaking"}
+            loop
+            videoRef={speakingVideoRef}
+          />
+        </div>
+
+        {/* ACTION */}
+        <div className="absolute bottom-16 flex justify-center items-center w-full">
+          <div className="flex justify-center items-center flex-1"></div>
+          <div className="flex justify-center items-center flex-1">
+            {/* MIC */}
+            {state != "speaking" ? (
+              <button
+                onMouseDown={handleHoldStart}
+                onMouseUp={handleHoldEnd}
+                onTouchStart={handleHoldStart}
+                onTouchEnd={handleHoldEnd}
+                className="p-5 rounded-full aspect-square relative overflow-visible bg-lightBlue hover:bg-[#2bbcc6]"
+              >
+                {state == "hearing" && (
+                  <>
+                    <div className="absolute inset-0 animate-ring rounded-full border border-[#1cdeec] opacity-50"></div>
+                    <div
+                      className="absolute inset-0 animate-ring rounded-full border border-[#1cdeec] opacity-50"
+                      style={{ animationDelay: "250ms" }}
+                    ></div>
+                  </>
+                )}
+                <div className="w-6 justify-center items-center overflow-hidden">
+                  <Image
+                    src={"/Primebot/Mic.svg"}
+                    alt="Logo Mic"
+                    width={1}
+                    height={1}
+                    className="w-full"
+                  />
+                </div>
+              </button>
+            ) : (
+              <button
+                onClick={handleAudioEnd}
+                className="p-5 rounded-full aspect-square relative overflow-visible bg-lightBlue hover:bg-[#2bbcc6]"
+              >
+                <div className="w-4 justify-center items-center overflow-hidden">
+                  <Image
+                    src={"/Primebot/Close.svg"}
+                    alt="Logo Mic"
+                    width={1}
+                    height={1}
+                    className="w-full"
+                  />
+                </div>
+              </button>
+            )}
+          </div>
+          <div className="flex justify-start items-center flex-1">
+            {/* HOME LINK */}
+            <Link href={"/"} className="w-12 aspect-square overflow-hidden">
+              <div className="w-full justify-center items-center overflow-hidden">
+                <Image
+                  src={"/Primebot/Home.svg"}
+                  alt="Logo Home"
+                  width={1}
+                  height={1}
+                  className="w-full"
+                />
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {audioUrl && (
+          <audio ref={audioRef} src={audioUrl} onEnded={handleAudioEnd} />
+        )}
+      </div>
+    </div>
+  );
+}
