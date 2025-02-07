@@ -4,8 +4,10 @@ import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Status from "../_components/Status";
+import { useRouter } from "next/navigation";
 
 export default function Absensi() {
+  const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [status, setStatus] = useState<boolean | null>(null);
@@ -88,6 +90,30 @@ export default function Absensi() {
       captureImage();
     }, 500);
   };
+
+  useEffect(() => {
+    let timeout = setTimeout(() => {
+      router.push("/");
+    }, 60000); // 15 detik
+
+    const resetTimeout = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        router.push("/");
+      }, 60000);
+    };
+
+    window.addEventListener("mousemove", resetTimeout);
+    window.addEventListener("keydown", resetTimeout);
+    window.addEventListener("click", resetTimeout);
+
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener("mousemove", resetTimeout);
+      window.removeEventListener("keydown", resetTimeout);
+      window.removeEventListener("click", resetTimeout);
+    };
+  }, [router]);
 
   return (
     <div className="w-full h-screen overflow-hidden flex justify-center items-center bg-white">

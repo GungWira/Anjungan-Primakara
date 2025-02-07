@@ -23,7 +23,7 @@ export default function Loading({ loading }: LoadingProps) {
   return (
     <div
       className={` flex h-screen delay-1000 transition-all ease-in-out duration-500 overflow-hidden fixed z-50 justify-center items-center bg-white aspect-[9/16] ${
-        progress == 100 ? "opacity-0 -z-0" : "opacity-100"
+        progress == 100 ? "opacity-0 z-0" : "opacity-100"
       }`}
     >
       {/* MAIN */}

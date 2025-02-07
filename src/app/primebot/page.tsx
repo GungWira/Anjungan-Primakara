@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SubtitlePlayer from "../_components/Subtitle";
 import Loading from "../_components/Loading";
+import { useRouter } from "next/navigation";
 
 declare global {
   interface Window {
@@ -14,6 +15,7 @@ declare global {
 }
 
 export default function Home() {
+  const router = useRouter();
   const [state, setState] = useState<
     "transform" | "idle" | "hearing" | "searching" | "speaking" | "loading"
   >("loading");
@@ -156,10 +158,34 @@ export default function Home() {
     setState("idle");
   };
 
+  useEffect(() => {
+    let timeout = setTimeout(() => {
+      router.push("/");
+    }, 60000); // 15 detik
+
+    const resetTimeout = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        router.push("/");
+      }, 60000);
+    };
+
+    window.addEventListener("mousemove", resetTimeout);
+    window.addEventListener("keydown", resetTimeout);
+    window.addEventListener("click", resetTimeout);
+
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener("mousemove", resetTimeout);
+      window.removeEventListener("keydown", resetTimeout);
+      window.removeEventListener("click", resetTimeout);
+    };
+  }, [router]);
+
   return (
     <div className="w-full h-screen bg-white overflow-hidden flex flex-col justify-center items-center relative min-h-screen">
       <Loading loading={isLoading} />
-      <div className="h-screen aspect-[9/16] flex justify-center items-center relative bg-black">
+      <div className="h-screen aspect-[9/16] flex justify-center items-center relative bg-black z-10">
         {/* HEAD */}
         <div className="w-full absolute top-0 left-0 flex justify-between items-center px-8 py-8">
           <Link href={"/"}>
