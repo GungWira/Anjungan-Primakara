@@ -95,7 +95,7 @@ export default function SubtitlePlayer({
   };
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full relative px-8">
       {currentSubtitle && audioUrl && (
         <>
           <div className="absolute w-full text-center text-white text-base bg-transparent opacity-80">
