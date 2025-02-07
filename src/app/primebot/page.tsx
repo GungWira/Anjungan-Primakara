@@ -184,7 +184,11 @@ export default function Home() {
   return (
     <div className="w-full h-screen bg-white overflow-hidden flex flex-col justify-center items-center relative min-h-screen">
       <Loading loading={isLoading} />
-      <div className="h-screen aspect-[9/16] flex justify-center items-center relative bg-black z-10">
+      <div
+        className={`h-screen aspect-[9/16] flex justify-center items-center relative bg-black ${
+          isLoading ? "z-0" : "z-50"
+        }`}
+      >
         {/* HEAD */}
         <div className="w-full absolute top-0 left-0 flex justify-between items-center px-8 py-8">
           <Link href={"/"}>
