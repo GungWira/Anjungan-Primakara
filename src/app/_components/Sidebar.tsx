@@ -56,7 +56,7 @@ export default function Sidebar() {
             Absensi
           </SidebarLink>
           <SidebarLink to="/primebot" icon="/Home/Bot.svg">
-            Primebot
+            Stelar
           </SidebarLink>
         </div>
 
