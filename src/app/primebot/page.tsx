@@ -131,8 +131,7 @@ export default function Home() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization:
-              "Bearer Lb3NbSWIPQb3YaDVLwUaxljWwGp6CxqKorqEEqFLajw=",
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_BOT_KEY}`,
           },
           body: JSON.stringify({ query: text }),
         }

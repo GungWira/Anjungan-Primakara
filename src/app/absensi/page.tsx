@@ -66,7 +66,7 @@ export default function Absensi() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer 1|Ih1gBdj2s4TDQUXD9DWdXTJYe8RhwCK8G7GNPwFB",
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_ABSENSI_KEY}`,
           },
           body: JSON.stringify({ base64: imageData, v3: 1 }),
         }
