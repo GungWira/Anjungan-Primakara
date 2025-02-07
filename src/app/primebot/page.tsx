@@ -218,7 +218,7 @@ export default function Home() {
           </div>
         </div>
         {/* VIDEO */}
-        <div className="w-full flex flex-col justify-center items-center gap-8">
+        <div className="w-full flex flex-col justify-center items-center gap-2">
           <div className="flex justify-center flex-col items-center w-[100%] relative overflow-hidden">
             <VideoPlayer
               src="Primebot/Berubah.mov"

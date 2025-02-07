@@ -6,7 +6,7 @@ interface VideoPlayerProps {
   onEnded?: () => void;
   loop?: boolean;
   videoRef: React.RefObject<HTMLVideoElement> | any;
-  position?: any;
+  position?: "absolute" | "relative";
 }
 
 export default function VideoPlayer({
